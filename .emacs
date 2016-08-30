@@ -127,3 +127,44 @@
 (local-set-key [tab] 'irony--indent-or-complete))
 (add-hook 'c-mode-common-hook 'irony-mode-keys)
 
+
+;; FULL INFO HERE: http://tuhdo.github.io/c-ide.html
+;;--------------------------------------------------
+;; C-M-f runs forwared-sexp, move forward over a balanced expr that can be a pair or a symbol
+;; C-M-b runs backward-sexp, move backward over a balanced expression that can be a pair or a symbol.
+;; C-M-k runs kill-sexp, kill balanced expression forward that can be a pair or a symbol.
+;; C-M-<SPC> or C-M-@ runs mark-sexp, put mark after following expression that can be a pair or a symbol.
+;; C-M-a runs beginning-of-defun, which moves point to beginning of a function.
+;; C-M-e runs end-of-defun, which moves point to end of a function.
+;; C-M-h runs mark-defun, which put a region around whole current or following function.
+;; Using gtags: by default, M-. runs ggtags-find-tag-dwim when ggtags-mode is enabled. The command ggtags-find-tag-dwim jump to tag base on context:
+;;If the tag at point is a definition, ggtags jumps to a reference. If there is more than one reference, it displays a list of references.
+;;If the tag at point is a reference, ggtags jumps to tag definition.
+;;If the tag at point is an include header, it jumps to that header.
+;;You can jump back to original location where you invoked ggtags-find-tag-dwim by M-,, which runs pop-tag-mark (if you follow my key bindings).
+
+;;You can also find arbitrary tag definition when invoking M-. on blank space. A prompt asks you for tag pattern, which is a regexp.
+
+;;If ggtags gives you a list of candidates, you can use M-n to move to next candidate and M-p to move back previous candidate. Use M-g s to invoke Isearch on candidate buffer list.
+
+;; If you want to list all the functions that the current function - the function that point is inside - calls, you can do that with helm-gtags-tags-in-this-function, which is bound to C-c g a in my setup.
+
+(require 'ggtags)
+(add-hook 'c-mode-common-hook
+	  (lambda ()
+	    (when (derived-mode-p 'c-mode 'c++-mode 'java-mode 'asm-mode)
+	      (ggtags-mode 1))))
+
+(define-key ggtags-mode-map (kbd "C-c g s") 'ggtags-find-other-symbol)
+(define-key ggtags-mode-map (kbd "C-c g h") 'ggtags-view-tag-history)
+(define-key ggtags-mode-map (kbd "C-c g r") 'ggtags-find-reference)
+(define-key ggtags-mode-map (kbd "C-c g f") 'ggtags-find-file)
+(define-key ggtags-mode-map (kbd "C-c g c") 'ggtags-create-tags)
+(define-key ggtags-mode-map (kbd "C-c g u") 'ggtags-update-tags)
+
+(define-key ggtags-mode-map (kbd "M-,") 'pop-tag-mark)
+
+(require 'sr-speedbar)
+(sr-speedbar-open)
+(with-current-buffer sr-speedbar-buffer-name
+  (setq window-size-fixed 'width))
